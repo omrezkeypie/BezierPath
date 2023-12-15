@@ -271,4 +271,4 @@ function BezierPath:CreatePathLookup()
 	end
 end
 
-return BezierPath    
+return BezierPath  
