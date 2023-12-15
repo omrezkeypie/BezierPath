@@ -16,7 +16,7 @@ local function lerp(p0,p1,t)
 end
 
 
-function BezierPath.new(Waypoints)
+function BezierPath.new(Waypoints,CurveSize)
 	local newPath = {}
 	setmetatable(newPath,BezierPath)
 	newPath.Sections = {}
@@ -28,6 +28,7 @@ function BezierPath.new(Waypoints)
 		Positions = {},
 		CFrames = {}
 	}
+	newPath.CurveSize = CurveSize
 	newPath:Setup(Waypoints)
 
 	return newPath
@@ -147,12 +148,6 @@ function BezierPath:PrecomputeUniformPositions()
 		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
 		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
-
-	local CalculatedCFrame = self:CalculatePrecomputationCFrame(1)
-	local index = math.floor(1 * (ITERATION_AMONT - 1) + 0.5)
-
-	self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,1}
-	self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,1}
 end
 
 function BezierPath:CalculateLength(Positions)
@@ -192,9 +187,9 @@ end
 function BezierPath:ClampDistance(Position1,Position2)
 	local Distance = (Position1 - Position2).Magnitude
 
-	if Distance < 3 then return Distance / 3 end
+	if Distance < self.CurveSize then return Distance / self.CurveSize end
 
-	return 3
+	return self.CurveSize
 end
 
 function BezierPath:Setup(StartingPositions)
