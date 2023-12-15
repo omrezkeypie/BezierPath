@@ -28,7 +28,7 @@ function BezierPath.new(Waypoints,CurveSize)
 		Positions = {},
 		CFrames = {}
 	}
-	newPath.CurveSize = CurveSize
+	newPath.CurveSize = math.clamp(CurveSize,0.1,3)
 	newPath:Setup(Waypoints)
 
 	return newPath
@@ -78,7 +78,7 @@ function BezierPath:CalculatePrecomputationPosition(T)
 end
 
 function BezierPath:CalculateUniformCFrame(T)
-	local TranslatedIndex = math.floor(math.clamp(T,0,1) * (ITERATION_AMONT - 1) + 0.5)
+	local TranslatedIndex = math.clamp(math.floor(math.clamp(T,0,1) * (ITERATION_AMONT - 1) + 0.5),0,ITERATION_AMONT - 1)
 	local FirstSample = self.PrecomputedCache["CFrames"][TranslatedIndex]
 	local SecondSample = self.PrecomputedCache["CFrames"][math.clamp(TranslatedIndex + 1,0,ITERATION_AMONT - 1)]
 	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
@@ -148,6 +148,12 @@ function BezierPath:PrecomputeUniformPositions()
 		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
 		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
+	
+	local index = math.floor(1 * (ITERATION_AMONT - 1) + 0.5)
+	local CalculatedCFrame = self:CalculatePrecomputationCFrame(1)
+
+	self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,1}
+	self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,1}
 end
 
 function BezierPath:CalculateLength(Positions)
@@ -187,7 +193,7 @@ end
 function BezierPath:ClampDistance(Position1,Position2)
 	local Distance = (Position1 - Position2).Magnitude
 
-	if Distance < self.CurveSize then return Distance / self.CurveSize end
+	if Distance < self.CurveSize then return Distance / self.CurveSize / 2 end
 
 	return self.CurveSize
 end
@@ -246,6 +252,8 @@ function BezierPath:Setup(StartingPositions)
 	ITERATION_AMONT = math.floor(self:GetPathLength() * 8)
 
 	self:PrecomputeUniformPositions()
+	
+	print(self.PrecomputedCache["CFrames"])
 end
 
 function BezierPath:CalculatePathLength()
