@@ -5,6 +5,7 @@ __NOTE__: BezierPath is NOT a traditional bezier spline. it behaves more like a 
 
 ## Example
 
+A code snippet showing how to set up and use BezierPath.
 ```lua
 local BezierPath = "Path to the module"
 local Positions = {
