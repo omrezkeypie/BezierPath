@@ -1,4 +1,24 @@
-local BezierPath = {}
+type Module = {
+	__index: Module,
+	new: (Waypoints: { Vector3 }) -> Path,
+	GetPartLength: (self: Path) -> number,
+	Map: (self: Path, Value: number, In_min: number, In_max: number, Out_min: number, Out_max: number) -> number,
+	CalculateSectionPosition: (self: Path, Positions: { Vector3 }, t: number) -> Vector3,
+	CalculateDerivative: (self: Path, Positions: { Vector3 }, t: number) -> Vector3,
+	CalculateCFrame: (self: Path, Positions: { Vector3 }, t: number) -> CFrame,
+	CalculatePrecomputationCFrame: (self: Path, T: number) -> CFrame,
+	CalculatePrecomputationPosition: (self: Path, T: number) -> Vector3,
+	CalculateUniformCFrame: (self: Path, T: number) -> CFrame,
+	CalculateUniformPosition: (self: Path, T: number) -> Vector3,
+
+	InterpolateT: (Lookup, T1),
+	PrecomputeUniformPositions: (self: Path) -> (),
+	CalculateLength: (Positions: { Vector3 }) -> number,
+	
+	
+}
+
+local BezierPath = {} :: Module
 BezierPath.__index = BezierPath
 local DEFAULT_EPSILON = 100
 local ITERATION_AMONT = 0
@@ -16,7 +36,7 @@ local function lerp(p0,p1,t)
 end
 
 
-function BezierPath.new(Waypoints)
+function BezierPath.new(Waypoints: { Vector3 }): Path
 	local newPath = {}
 	setmetatable(newPath,BezierPath)
 	newPath.Sections = {}
@@ -267,5 +287,7 @@ function BezierPath:CreatePathLookup()
 		self.PathLookup[Section] = {PortionOfPath,(AccumalatedLength - Section.Length) / self.PathLength}
 	end
 end
+
+export type Path = typeof(setmetatable({}, {} :: Module))
 
 return BezierPath  
