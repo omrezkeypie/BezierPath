@@ -19,6 +19,7 @@ part.Anchored = true
 
 for t = 0,1,1/100 do
     Part.CFrame = NewPath:CalculateUniformCFrame(t)
+    task.wait(0.1)
 end
 ```
 
