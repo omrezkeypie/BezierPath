@@ -15,6 +15,6 @@ Takes in a T value from 0-1 and returns a uniform cframe across the path object.
   
 Takes in a T value from 0-1 and returns a uniform position across the path object.
 
-*Path:GetPathLength()
+* Path:GetPathLength()
 
 Returns the path objects length
