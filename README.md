@@ -40,4 +40,4 @@ Takes in a T value from 0-1 and returns a uniform position across the path objec
 
 * Path:GetPathLength()
 
-Returns the path objects length
+Returns the path objects length.
