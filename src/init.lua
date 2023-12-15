@@ -148,7 +148,7 @@ function BezierPath:PrecomputeUniformPositions()
 		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
 		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
-	
+
 	local index = math.floor(1 * (ITERATION_AMONT - 1) + 0.5)
 	local CalculatedCFrame = self:CalculatePrecomputationCFrame(1)
 
@@ -243,7 +243,7 @@ function BezierPath:Setup(StartingPositions)
 
 	self:CalculatePathLength()
 
-	for _,Section in pairs(self.Sections) do
+	for _,Section in self.Sections do
 		Section.LookUp = self:CreateSectionLookup(Section)
 	end
 
@@ -252,23 +252,23 @@ function BezierPath:Setup(StartingPositions)
 	ITERATION_AMONT = math.floor(self:GetPathLength() * 8)
 
 	self:PrecomputeUniformPositions()
-	
+
 	print(self.PrecomputedCache["CFrames"])
 end
 
 function BezierPath:CalculatePathLength()
-	for i,section in pairs(self.Sections) do
+	for i,section in self.Sections do
 		self.PathLength += section.Length
 	end
 end
 
 function BezierPath:CreatePathLookup()
 	local AccumalatedLength = 0
-	for i,Section in pairs(self.Sections) do
+	for i,Section in self.Sections do
 		AccumalatedLength += Section.Length
 		local PortionOfPath = AccumalatedLength / self.PathLength
 		self.PathLookup[Section] = {PortionOfPath,(AccumalatedLength - Section.Length) / self.PathLength}
 	end
 end
 
-return BezierPath  
+return BezierPath    
