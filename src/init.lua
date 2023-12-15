@@ -252,8 +252,6 @@ function BezierPath:Setup(StartingPositions)
 	ITERATION_AMONT = math.floor(self:GetPathLength() * 8)
 
 	self:PrecomputeUniformPositions()
-
-	print(self.PrecomputedCache["CFrames"])
 end
 
 function BezierPath:CalculatePathLength()
