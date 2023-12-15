@@ -61,7 +61,6 @@ local function lerp<T>(p0: T, p1: T, t: number): T
 	return p0 + t*(p1 - p0)
 end
 
-
 function BezierPath.new(Waypoints: { Vector3 }, CurveSize: number): Path
 	local newPath = {}
 	setmetatable(newPath,BezierPath)
