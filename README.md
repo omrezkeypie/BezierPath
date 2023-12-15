@@ -1,6 +1,8 @@
 # ABOUT
 BezierPath is a flexible bezier spline module, designed to be easy to implenent and use while being optimizied for large scale uses.
 
+__NOTE__: BezierPath is NOT a traditional bezier spline. it behaves more like a linear spline that curves around each point.
+
 ## API
 
 * BezierPath.new(Positions)
