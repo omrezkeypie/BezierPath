@@ -14,7 +14,7 @@ type self = {
 	PathLookUp: { [Section]: { number } },
 	TotalDistance: number,
 	SampleAmount: number,
-	PrecomputedCache: {} :: {
+	PrecomputedCache: {
 		Positions: { Vector3 },
 		CFrames: { CFrame }
 	},
@@ -33,7 +33,7 @@ type Module = {
 	CalculatePrecomputationPosition: (self: Path, T: number) -> Vector3,
 	CalculateUniformCFrame: (self: Path, T: number) -> CFrame,
 	CalculateUniformPosition: (self: Path, T: number) -> Vector3,
-	InterpolateTPath: (self: Path, T: number) -> Section
+	InterpolateTPath: (self: Path, T: number) -> Section,
 	InterpolateT: (self: Path, Lookup: LookUp, T1: number) -> number,
 	PrecomputeUniformPositions: (self: Path) -> (),
 	CalculateLength: (self: Path, Positions: { Vector3 }) -> number,
