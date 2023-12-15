@@ -65,7 +65,7 @@ end
 function BezierPath:CalculatePrecomputationCFrame(T)
 	local PathSection = self:InterpolateTPath(T)
 	local InterpolatedT = self:InterpolateT(PathSection.LookUp,T)
-	
+
 	return self:CalculateCFrame(PathSection.Positions,InterpolatedT)
 end
 
@@ -81,7 +81,7 @@ function BezierPath:CalculateUniformCFrame(T)
 	local FirstSample = self.PrecomputedCache["CFrames"][TranslatedIndex]
 	local SecondSample = self.PrecomputedCache["CFrames"][math.clamp(TranslatedIndex + 1,0,ITERATION_AMONT - 1)]
 	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
-	
+
 	return FirstSample[1]:Lerp(SecondSample[1],Progress)
 end
 
@@ -136,21 +136,21 @@ function BezierPath:InterpolateT(Lookup, T1)
 
 	return 1
 end
- 
+
 function BezierPath:PrecomputeUniformPositions()
 	local step = 1 / (ITERATION_AMONT - 1)
 
 	for t = 0, 1, step do
 		local index = math.floor(t * (ITERATION_AMONT - 1) + 0.5)
 		local CalculatedCFrame = self:CalculatePrecomputationCFrame(t)
-		
+
 		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
 		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
-     
+
 	local CalculatedCFrame = self:CalculatePrecomputationCFrame(1)
 	local index = math.floor(1 * (ITERATION_AMONT - 1) + 0.5)
-	
+
 	self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,1}
 	self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,1}
 end
@@ -185,20 +185,19 @@ function BezierPath:CreateSectionLookup(Section)
 
 	self.TotalDistance = AccumulatedDistance
 	LookUp.TotalDistance = AccumulatedDistance
-	
+
 	return LookUp
 end
 
 function BezierPath:ClampDistance(Position1,Position2)
 	local Distance = (Position1 - Position2).Magnitude
-	
+
 	if Distance < 3 then return Distance / 3 end
-	
+
 	return 3
 end
 
 function BezierPath:Setup(StartingPositions)
-    local e = os.clock()	
 	local newWaypoints = {}
 
 	table.insert(newWaypoints,StartingPositions[1])
@@ -246,11 +245,11 @@ function BezierPath:Setup(StartingPositions)
 	for _,Section in pairs(self.Sections) do
 		Section.LookUp = self:CreateSectionLookup(Section)
 	end
-	
+
 	self:CreatePathLookup()
-	
+
 	ITERATION_AMONT = math.floor(self:GetPathLength() * 8)
-	
+
 	self:PrecomputeUniformPositions()
 end
 
