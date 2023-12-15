@@ -5,9 +5,9 @@ __NOTE__: BezierPath is NOT a traditional bezier spline. it behaves more like a 
 
 ## API
 
-* BezierPath.new(Positions)
+* BezierPath.new(Positions,CurveSize)
 
-Takes in a table of positions which will be used as the waypoints for the spline and returns the path object.
+Takes in a table of positions which will be used as the waypoints for the spline and takes in a number (maximum is 3) to control the size of the curve between the waypoints and returns the path object.
 
 * Path:CalculateUniformCFrame(T)
   
