@@ -23,7 +23,7 @@ type self = {
 
 type Module = {
 	__index: Module,
-	new: (Waypoints: { Vector3 }) -> Path,
+	new: (Waypoints: { Vector3 },CurveSize : number) -> Path,
 	GetPathLength: (self: Path) -> number,
 	_Map: (self: Path, Value: number, In_min: number, In_max: number, Out_min: number, Out_max: number) -> number,
 	_CalculateSectionPosition: (self: Path, Positions: { Vector3 }, t: number) -> Vector3,
