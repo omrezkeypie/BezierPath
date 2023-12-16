@@ -1,3 +1,4 @@
+--!native
 type LookAt = {
 	Distances: { number }
 }
@@ -116,18 +117,20 @@ function BezierPath:_CalculatePrecomputationCFrame(T: number): CFrame
 end
 
 function BezierPath:CalculateUniformCFrame(T: number): CFrame
-	local TranslatedIndex = math.clamp(math.floor(math.clamp(T,0,1) * (ITERATION_AMONT - 1) + 0.5),0,ITERATION_AMONT - 1)
+	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * ITERATION_AMONT),ITERATION_AMONT - 1)
 	local FirstSample = self.PrecomputedCache["CFrames"][TranslatedIndex]
-	local SecondSample = self.PrecomputedCache["CFrames"][math.clamp(TranslatedIndex + 1,0,ITERATION_AMONT - 1)]
+	local SecondSample = self.PrecomputedCache["CFrames"][math.min(TranslatedIndex + 1,ITERATION_AMONT - 1)]
+
 	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
 
 	return FirstSample[1]:Lerp(SecondSample[1],Progress)
 end
 
-function BezierPath:CalculateUniformPosition(T: number): Vector3
-	local TranslatedIndex = math.floor(math.clamp(T,0,1) * (ITERATION_AMONT - 1) + 0.5)
+function BezierPath:CalculateUniformPosition(T: number): CFrame
+	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * ITERATION_AMONT),ITERATION_AMONT - 1)
 	local FirstSample = self.PrecomputedCache["Positions"][TranslatedIndex]
-	local SecondSample = self.PrecomputedCache["Positions"][math.clamp(TranslatedIndex + 1,0,ITERATION_AMONT - 1)]
+	local SecondSample = self.PrecomputedCache["Positions"][math.min(TranslatedIndex + 1,ITERATION_AMONT - 1)]
+
 	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
 
 	return lerp(FirstSample[1],SecondSample[1],Progress)
@@ -180,14 +183,14 @@ function BezierPath:_PrecomputeUniformPositions()
 	local step = 1 / (ITERATION_AMONT - 1)
 
 	for t = 0, 1, step do
-		local index = math.floor(t * (ITERATION_AMONT - 1) + 0.5)
+		local index = math.floor(t * ITERATION_AMONT)
 		local CalculatedCFrame = self:_CalculatePrecomputationCFrame(t)
 
 		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
 		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
 
-	local index = math.floor(1 * (ITERATION_AMONT - 1) + 0.5)
+	local index = math.floor(1 * ITERATION_AMONT) - 1
 	local CalculatedCFrame = self:_CalculatePrecomputationCFrame(1)
 
 	self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,1}
