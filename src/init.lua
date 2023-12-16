@@ -1,4 +1,5 @@
 --!native
+--!nonstrict
 type LookAt = {
 	Distances: { number }
 }
@@ -11,8 +12,8 @@ type Section = {
 
 type self = {
 	Sections: { Section },
-	PathLenght: number,
-	PathLookUp: { [Section]: { number } },
+	PathLength: number,
+	PathLookup: { [Section]: { number } },
 	TotalDistance: number,
 	SampleAmount: number,
 	PrecomputedCache: {
@@ -34,10 +35,10 @@ type Module = {
 	CalculateUniformCFrame: (self: Path, T: number) -> CFrame,
 	CalculateUniformPosition: (self: Path, T: number) -> Vector3,
 	_InterpolateTPath: (self: Path, T: number) -> Section,
-	_InterpolateT: (self: Path, Lookup: LookUp, T1: number) -> number,
+	_InterpolateT: (self: Path, Lookup: LookAt, T1: number) -> number,
 	_PrecomputeUniformPositions: (self: Path) -> (),
 	_CalculateLength: (self: Path, Positions: { Vector3 }) -> number,
-	_CreateSectionLookup: (self: Path, Section: Section) -> LookUp,
+	_CreateSectionLookup: (self: Path, Section: Section) -> LookAt,
 	_ClampDistance: (self: Path, Position1: Vector3, Position2: Vector3) -> number,
 	_Setup: (self: Path, StartingPositions: { Vector3 }) -> (),
 	_CalculatePathLength: (self: Path) -> (),
@@ -146,7 +147,7 @@ function BezierPath:_InterpolateTPath(T: number): Section
 	return self.PathLookup[#self.PathLookup]
 end
 
-function BezierPath:_InterpolateT(Lookup: LookUp, T1: number): number
+function BezierPath:_InterpolateT(Lookup: LookAt, T1: number): number
 	local distances = Lookup.Distances
 	local n = #distances - 1 
 	local targetDistance = self.PathLength * T1
@@ -209,7 +210,7 @@ function BezierPath:_CalculateLength(Positions: { Vector3 }): number
 	return Length
 end
 
-function BezierPath:_CreateSectionLookup(Section: Section): LookUp
+function BezierPath:_CreateSectionLookup(Section: Section): LookAt
 	local LookUp = {
 		Distances = {}
 	}
