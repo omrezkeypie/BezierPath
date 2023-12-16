@@ -1,4 +1,5 @@
 --!native
+--!nonstrict
 type LookAt = {
 	Distances: { number }
 }
@@ -11,8 +12,8 @@ type Section = {
 
 type self = {
 	Sections: { Section },
-	PathLenght: number,
-	PathLookUp: { [Section]: { number } },
+	PathLength: number,
+	PathLookup: { [Section]: { number } },
 	TotalDistance: number,
 	SampleAmount: number,
 	PrecomputedCache: {
@@ -24,7 +25,7 @@ type self = {
 
 type Module = {
 	__index: Module,
-	new: (Waypoints: { Vector3 },CurveSize : number) -> Path,
+	new: (Waypoints: { Vector3 }, CurveSize: number) -> Path,
 	GetPathLength: (self: Path) -> number,
 	_Map: (self: Path, Value: number, In_min: number, In_max: number, Out_min: number, Out_max: number) -> number,
 	_CalculateSectionPosition: (self: Path, Positions: { Vector3 }, t: number) -> Vector3,
@@ -34,10 +35,10 @@ type Module = {
 	CalculateUniformCFrame: (self: Path, T: number) -> CFrame,
 	CalculateUniformPosition: (self: Path, T: number) -> Vector3,
 	_InterpolateTPath: (self: Path, T: number) -> Section,
-	_InterpolateT: (self: Path, Lookup: LookUp, T1: number) -> number,
+	_InterpolateT: (self: Path, Lookup: LookAt, T1: number) -> number,
 	_PrecomputeUniformPositions: (self: Path) -> (),
 	_CalculateLength: (self: Path, Positions: { Vector3 }) -> number,
-	_CreateSectionLookup: (self: Path, Section: Section) -> LookUp,
+	_CreateSectionLookup: (self: Path, Section: Section) -> LookAt,
 	_ClampDistance: (self: Path, Position1: Vector3, Position2: Vector3) -> number,
 	_Setup: (self: Path, StartingPositions: { Vector3 }) -> (),
 	_CalculatePathLength: (self: Path) -> (),
@@ -49,15 +50,15 @@ BezierPath.__index = BezierPath
 local DEFAULT_EPSILON = 100
 local ITERATION_AMONT = 0
 
-local function bez<T>(p0: T, p1: T, p2: T, t: number): T 
+local function bez(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3 
 	return p1 + (1-t)^2*(p0 - p1)+t^2*(p2 - p1)
 end
 
-local function bezder<T>(p0: T, p1: T, p2: T, t: number): T
+local function bezder(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3
 	return 2*(1 - t)*(p1-p0) + 2*t*(p2-p1)
 end
 
-local function lerp<T>(p0: T, p1: T, t: number): T
+local function lerp(p0: Vector3, p1: Vector3, t: number): Vector3
 	return p0 + t*(p1 - p0)
 end
 
@@ -146,7 +147,7 @@ function BezierPath:_InterpolateTPath(T: number): Section
 	return self.PathLookup[#self.PathLookup]
 end
 
-function BezierPath:_InterpolateT(Lookup: LookUp, T1: number): number
+function BezierPath:_InterpolateT(Lookup: LookAt, T1: number): number
 	local distances = Lookup.Distances
 	local n = #distances - 1 
 	local targetDistance = self.PathLength * T1
@@ -209,7 +210,7 @@ function BezierPath:_CalculateLength(Positions: { Vector3 }): number
 	return Length
 end
 
-function BezierPath:_CreateSectionLookup(Section: Section): LookUp
+function BezierPath:_CreateSectionLookup(Section: Section): LookAt
 	local LookUp = {
 		Distances = {}
 	}
