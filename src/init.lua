@@ -20,7 +20,8 @@ type self = {
 		Positions: { Vector3 },
 		CFrames: { CFrame },
 	},
-	CurveSize: number
+	CurveSize: number,
+	ITERATION_AMOUNT: number
 }
 
 type Module = {
@@ -48,7 +49,6 @@ type Module = {
 local BezierPath = {} :: Module
 BezierPath.__index = BezierPath
 local DEFAULT_EPSILON = 100
-local ITERATION_AMONT = 0
 
 local function bez(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3 
 	return p1 + (1-t)^2*(p0 - p1)+t^2*(p2 - p1)
@@ -76,6 +76,7 @@ function BezierPath.new(Waypoints: { Vector3 }, CurveSize: number): Path
 		CFrames = {}
 	}
 	newPath.CurveSize = math.clamp(CurveSize,0.1,3)
+	newPath.ITERATION_AMOUNT = 0
 	newPath:_Setup(Waypoints)
 
 	return newPath
@@ -118,9 +119,9 @@ function BezierPath:_CalculatePrecomputationCFrame(T: number): CFrame
 end
 
 function BezierPath:CalculateUniformCFrame(T: number): CFrame
-	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * ITERATION_AMONT),ITERATION_AMONT - 1)
+	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMONT),self.ITERATION_AMONT - 1)
 	local FirstSample = self.PrecomputedCache["CFrames"][TranslatedIndex]
-	local SecondSample = self.PrecomputedCache["CFrames"][math.min(TranslatedIndex + 1,ITERATION_AMONT - 1)]
+	local SecondSample = self.PrecomputedCache["CFrames"][math.min(TranslatedIndex + 1,self.ITERATION_AMONT - 1)]
 
 	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
 
@@ -128,9 +129,9 @@ function BezierPath:CalculateUniformCFrame(T: number): CFrame
 end
 
 function BezierPath:CalculateUniformPosition(T: number): Vector3
-	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * ITERATION_AMONT),ITERATION_AMONT - 1)
+	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMONT),self.ITERATION_AMONT - 1)
 	local FirstSample = self.PrecomputedCache["Positions"][TranslatedIndex]
-	local SecondSample = self.PrecomputedCache["Positions"][math.min(TranslatedIndex + 1,ITERATION_AMONT - 1)]
+	local SecondSample = self.PrecomputedCache["Positions"][math.min(TranslatedIndex + 1,self.ITERATION_AMONT - 1)]
 
 	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
 
@@ -181,17 +182,17 @@ function BezierPath:_InterpolateT(Lookup: LookAt, T1: number): number
 end
 
 function BezierPath:_PrecomputeUniformPositions()
-	local step = 1 / (ITERATION_AMONT - 1)
+	local step = 1 / (self.ITERATION_AMONT - 1)
 
 	for t = 0, 1, step do
-		local index = math.floor(t * ITERATION_AMONT)
+		local index = math.floor(t * self.ITERATION_AMONT)
 		local CalculatedCFrame = self:_CalculatePrecomputationCFrame(t)
 
 		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
 		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
 
-	local index = math.floor(1 * ITERATION_AMONT) - 1
+	local index = math.floor(1 * self.ITERATION_AMONT) - 1
 	local CalculatedCFrame = self:_CalculatePrecomputationCFrame(1)
 
 	self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,1}
@@ -254,7 +255,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 		local Positions = {
 			CurrentPosition - (CurrentPosition - PreviousPosition).Unit * self:_ClampDistance(CurrentPosition,PreviousPosition),
 			CurrentPosition - (CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition),
-			CurrentPosition - (CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition) * 1.1
+			CurrentPosition - (CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition)
 		}  
 
 		for j = 1,3 do
@@ -275,6 +276,14 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 			newWaypoints[Index],
 			newWaypoints[Index + 1],
 		}
+		
+		for i,v in Positions do
+			local newWaypoint = Instance.new("Part",workspace)
+			newWaypoint.Size = Vector3.new(0.1,1,0.1)
+			newWaypoint.Position = v
+			newWaypoint.Anchored = true
+		end
+		
 		local Section = {
 			Positions = Positions,
 			Length = self:_CalculateLength(Positions),
@@ -291,7 +300,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 
 	self:_CreatePathLookup()
 
-	ITERATION_AMONT = math.floor(self:GetPathLength() * 8)
+	self.ITERATION_AMONT = math.floor(self:GetPathLength() * 8)
 
 	self:_PrecomputeUniformPositions()
 end
