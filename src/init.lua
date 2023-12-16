@@ -127,7 +127,7 @@ function BezierPath:CalculateUniformCFrame(T: number): CFrame
 	return FirstSample[1]:Lerp(SecondSample[1],Progress)
 end
 
-function BezierPath:CalculateUniformPosition(T: number): CFrame
+function BezierPath:CalculateUniformPosition(T: number): Vector3
 	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * ITERATION_AMONT),ITERATION_AMONT - 1)
 	local FirstSample = self.PrecomputedCache["Positions"][TranslatedIndex]
 	local SecondSample = self.PrecomputedCache["Positions"][math.min(TranslatedIndex + 1,ITERATION_AMONT - 1)]
