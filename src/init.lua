@@ -50,15 +50,15 @@ BezierPath.__index = BezierPath
 local DEFAULT_EPSILON = 100
 local ITERATION_AMONT = 0
 
-local function bez<T>(p0: T, p1: T, p2: T, t: number): T 
+local function bez(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3 
 	return p1 + (1-t)^2*(p0 - p1)+t^2*(p2 - p1)
 end
 
-local function bezder<T>(p0: T, p1: T, p2: T, t: number): T
+local function bezder(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3
 	return 2*(1 - t)*(p1-p0) + 2*t*(p2-p1)
 end
 
-local function lerp<T>(p0: T, p1: T, t: number): T
+local function lerp(p0: Vector3, p1: Vector3, t: number): Vector3
 	return p0 + t*(p1 - p0)
 end
 
