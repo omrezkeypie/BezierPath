@@ -235,8 +235,8 @@ end
 
 function BezierPath:_ClampDistance(Position1: Vector3, Position2: Vector3): number
 	local Distance = (Position1 - Position2).Magnitude
-    
-	if Distance < self.CurveSize * 2 then return 1 end
+
+	if Distance < self.CurveSize ^ 2 then return 1 end
 
 	return self.CurveSize
 end
@@ -257,7 +257,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 			CurrentPosition - ((CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition)),
 			CurrentPosition - ((CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition))
 		}  
-		
+
 		for j = 1,3 do 
 			table.insert(newWaypoints,Positions[j])
 			if j == 1 then
@@ -265,7 +265,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 			end
 		end 
 	end
-    
+
 
 	table.insert(newWaypoints,StartingPositions[#StartingPositions])
 
@@ -276,7 +276,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 			newWaypoints[Index],
 			newWaypoints[Index + 1],
 		}
-		
+
 		local Section = {
 			Positions = Positions,
 			Length = self:_CalculateLength(Positions),
