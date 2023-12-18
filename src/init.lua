@@ -7,7 +7,7 @@ type LookAt = {
 type Section = {
 	Positions: { Vector3 },
 	Length: number,
-	LookAt: LookAt?
+	LookAt: LookAt
 }
 
 type self = {
@@ -235,8 +235,8 @@ end
 
 function BezierPath:_ClampDistance(Position1: Vector3, Position2: Vector3): number
 	local Distance = (Position1 - Position2).Magnitude
-
-	if Distance < self.CurveSize then return Distance / self.CurveSize / 2 end
+    
+	if Distance < self.CurveSize * 2 then return 1 end
 
 	return self.CurveSize
 end
@@ -253,19 +253,19 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 		local NextPosition = StartingPositions[i + 1]
 		local PreviousPosition = StartingPositions[i - 1]
 		local Positions = {
-			CurrentPosition - (CurrentPosition - PreviousPosition).Unit * self:_ClampDistance(CurrentPosition,PreviousPosition),
-			CurrentPosition - (CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition),
-			CurrentPosition - (CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition)
+			CurrentPosition - ((CurrentPosition - PreviousPosition).Unit * self:_ClampDistance(CurrentPosition,PreviousPosition)),
+			CurrentPosition - ((CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition)),
+			CurrentPosition - ((CurrentPosition - NextPosition).Unit * self:_ClampDistance(CurrentPosition,NextPosition))
 		}  
-
-		for j = 1,3 do
+		
+		for j = 1,3 do 
 			table.insert(newWaypoints,Positions[j])
 			if j == 1 then
 				table.insert(newWaypoints,CurrentPosition)
 			end
 		end 
 	end
-
+    
 
 	table.insert(newWaypoints,StartingPositions[#StartingPositions])
 
@@ -276,7 +276,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 			newWaypoints[Index],
 			newWaypoints[Index + 1],
 		}
-
+		
 		local Section = {
 			Positions = Positions,
 			Length = self:_CalculateLength(Positions),
