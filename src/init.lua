@@ -276,14 +276,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 			newWaypoints[Index],
 			newWaypoints[Index + 1],
 		}
-		
-		for i,v in Positions do
-			local newWaypoint = Instance.new("Part",workspace)
-			newWaypoint.Size = Vector3.new(0.1,1,0.1)
-			newWaypoint.Position = v
-			newWaypoint.Anchored = true
-		end
-		
+
 		local Section = {
 			Positions = Positions,
 			Length = self:_CalculateLength(Positions),
