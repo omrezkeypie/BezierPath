@@ -19,7 +19,10 @@ type self = {
 	PathLookup: { [Section]: { number } },
 	TotalDistance: number,
 	SampleAmount: number,
-	PrecomputedCache: {PrecomputedCache},
+	PrecomputedCache: {
+		Positions: { PrecomputedCache },
+		CFrames: { PrecomputedCache },
+	},
 	CurveSize: number,
 	ITERATION_AMOUNT: number
 }
@@ -71,7 +74,10 @@ function BezierPath.new(Waypoints: { Vector3 }, CurveSize: number): Path
 	newPath.PathLookup = {}
 	newPath.TotalDistance = 0
 	newPath.SampleAmount = 0
-	newPath.PrecomputedCache = {}
+	newPath.PrecomputedCache = {
+		Positions = {},
+		CFrames = {}
+	}
 	newPath.CurveSize = math.clamp(CurveSize,0.1,3)
 	newPath.ITERATION_AMOUNT = 0
 	newPath:_Setup(Waypoints)
@@ -117,8 +123,8 @@ end
 
 function BezierPath:CalculateUniformCFrame(T: number): CFrame
 	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMOUNT),self.ITERATION_AMOUNT - 1)
-	local FirstSample = self.PrecomputedCache[TranslatedIndex]
-	local SecondSample = self.PrecomputedCache[math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
+	local FirstSample = self.PrecomputedCache["CFrames"][TranslatedIndex]
+	local SecondSample = self.PrecomputedCache["CFrames"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
 
 	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
 
@@ -127,12 +133,12 @@ end
 
 function BezierPath:CalculateUniformPosition(T: number): Vector3
 	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMOUNT),self.ITERATION_AMOUNT - 1)
-	local FirstSample = self.PrecomputedCache[TranslatedIndex]
-	local SecondSample = self.PrecomputedCache[math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
+	local FirstSample = self.PrecomputedCache["Positions"][TranslatedIndex]
+	local SecondSample = self.PrecomputedCache["Positions"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
 
 	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
 
-	return lerp(FirstSample[1].Position,SecondSample[1].Position,Progress)
+	return lerp(FirstSample[1],SecondSample[1],Progress)
 end
 
 function BezierPath:_InterpolateTPath(T: number): Section
@@ -185,13 +191,15 @@ function BezierPath:_PrecomputeUniformPositions()
 		local index = math.floor(t * self.ITERATION_AMOUNT)
 		local CalculatedCFrame = self:_CalculatePrecomputationCFrame(t)
 
-		self.PrecomputedCache[index] = {CalculatedCFrame,t}
+		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
+		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
 
 	local index = math.floor(1 * self.ITERATION_AMOUNT) - 1
 	local CalculatedCFrame = self:_CalculatePrecomputationCFrame(1)
 
-	self.PrecomputedCache[index] = {CalculatedCFrame,1}
+	self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,1}
+	self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,1}
 end
 
 function BezierPath:_CalculateLength(Positions: { Vector3 }): number
@@ -210,7 +218,7 @@ function BezierPath:_CreateSectionLookup(Section: Section): LookUp
 	local LookUp = {
 		Distances = {}
 	}
-	local Segments =  math.ceil(30 * Section.Length )
+	local Segments =  math.floor(30 * (Section.Length + 0.5))
 
 	local prevPosition = self:_CalculateSectionPosition(Section.Positions,0)
 	local AccumulatedDistance = self.TotalDistance
