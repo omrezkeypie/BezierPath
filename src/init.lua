@@ -192,7 +192,7 @@ function BezierPath:_PrecomputeUniformPositions()
 		local index = math.floor(t * self.ITERATION_AMOUNT) -- Translate the T value to an index in the table
 		local CalculatedCFrame = self:_CalculatePrecomputationCFrame(t)
 
-		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t} --Store it for later use
+		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
 		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
 
@@ -229,7 +229,7 @@ function BezierPath:_CreateSectionLookup(Section: Section): LookUp
 		local deltaPosition = prevPosition - Position
 		local SegmentLength = deltaPosition.Magnitude
 		AccumulatedDistance = AccumulatedDistance + SegmentLength --Update the accumlated distance based on the previous position and the new position
-		LookUp.Distances[i] = AccumulatedDistance --Store the accumulated distance in the look up in order to map it in the future
+		LookUp.Distances[i] = AccumulatedDistance
 		prevPosition = Position
 	end
 
