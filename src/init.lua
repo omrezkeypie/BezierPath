@@ -122,16 +122,16 @@ function BezierPath:_CalculatePrecomputationCFrame(T: number): CFrame
 end
 
 function BezierPath:CalculateUniformCFrame(T: number): CFrame
-	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMOUNT),self.ITERATION_AMOUNT - 1)
+	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMOUNT),self.ITERATION_AMOUNT - 1) --Translate the T value to the needed index in the precomputation table
 	local FirstSample = self.PrecomputedCache["CFrames"][TranslatedIndex]
 	local SecondSample = self.PrecomputedCache["CFrames"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
 
-	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
+	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2]) --Get the progress between the first sample and the second sample in order to approximate a lerp for smooth movement
 
 	return FirstSample[1]:Lerp(SecondSample[1],Progress)
 end
 
-function BezierPath:CalculateUniformPosition(T: number): Vector3
+function BezierPath:CalculateUniformPosition(T: number): Vector3 --same thing as CalculateUniformCFrame
 	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMOUNT),self.ITERATION_AMOUNT - 1)
 	local FirstSample = self.PrecomputedCache["Positions"][TranslatedIndex]
 	local SecondSample = self.PrecomputedCache["Positions"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
@@ -143,7 +143,7 @@ end
 
 function BezierPath:_InterpolateTPath(T: number): Section
 	for Section,Portion in self.PathLookup do
-		if Portion[1] >= T and Portion[2] <= T then
+		if Portion[1] >= T and Portion[2] <= T then --Check if the Portion the section is located in is in the T values range
 			return Section
 		end
 	end
@@ -152,19 +152,20 @@ function BezierPath:_InterpolateTPath(T: number): Section
 end
 
 function BezierPath:_InterpolateT(Lookup: LookUp, T1: number): number
-	local distances = Lookup.Distances
+	local distances = Lookup.Distances --The distances in the lookup table
 	local n = #distances - 1 
-	local targetDistance = self.PathLength * T1
+	local targetDistance = self.PathLength * T1 --Translate T value to the distance along the path
 
+	--Indexs for binary search
 	local lo = 0
 	local hi = #distances
 
-	repeat
+	repeat --Binary search to find the correct distance value in the look up table and map it to get uniform positioning across the curve
 		local i = math.floor(lo + (hi - lo) / 2)
 		local value = distances[i + 1]
 		local previousValue = distances[i]
 
-		if previousValue <= targetDistance and value >= targetDistance then
+		if previousValue <= targetDistance and value >= targetDistance then --if found the wanted value, return its uniform version
 			return self:_Map(
 				targetDistance,
 
@@ -174,24 +175,24 @@ function BezierPath:_InterpolateT(Lookup: LookUp, T1: number): number
 				i / n,
 				(i + 1) / n
 			)  
-		elseif value > targetDistance then
+		elseif value > targetDistance then --if not found, update the indexs and continue the binary search
 			hi = i
 		else
 			lo = i + 1
 		end
 	until lo >= hi
 
-	return 1
+	return 1 
 end
 
 function BezierPath:_PrecomputeUniformPositions()
-	local step = 1 / (self.ITERATION_AMOUNT - 1)
+	local step = 1 / (self.ITERATION_AMOUNT - 1) --Get the step amount for the precomputation based on the iteration amount
 
 	for t = 0, 1, step do
-		local index = math.floor(t * self.ITERATION_AMOUNT)
+		local index = math.floor(t * self.ITERATION_AMOUNT) -- Translate the T value to an index in the table
 		local CalculatedCFrame = self:_CalculatePrecomputationCFrame(t)
 
-		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t}
+		self.PrecomputedCache["CFrames"][index] = {CalculatedCFrame,t} --Store it for later use
 		self.PrecomputedCache["Positions"][index] = {CalculatedCFrame.Position,t}
 	end
 
@@ -204,9 +205,9 @@ end
 
 function BezierPath:_CalculateLength(Positions: { Vector3 }): number
 	local Length = 0
-	local Epsilon = 1/DEFAULT_EPSILON
+	local Epsilon = 1/DEFAULT_EPSILON --Step amount using an epsilon
 
-	for i = 0,1,Epsilon do
+	for i = 0,1,Epsilon do --approximate the length cause beziers dont have a length formula :(
 		local Pos1,Pos2 = self:_CalculateSectionPosition(Positions,i),self:_CalculateSectionPosition(Positions,i+Epsilon)
 		Length += (Pos1 - Pos2).Magnitude
 	end
@@ -218,7 +219,7 @@ function BezierPath:_CreateSectionLookup(Section: Section): LookUp
 	local LookUp = {
 		Distances = {}
 	}
-	local Segments =  math.floor(30 * (Section.Length + 0.5))
+	local Segments =  math.floor(30 * (Section.Length + 0.5)) --How many segments to divide the section for the lookup table
 
 	local prevPosition = self:_CalculateSectionPosition(Section.Positions,0)
 	local AccumulatedDistance = self.TotalDistance
@@ -227,8 +228,8 @@ function BezierPath:_CreateSectionLookup(Section: Section): LookUp
 		local Position = self:_CalculateSectionPosition(Section.Positions, i / Segments)
 		local deltaPosition = prevPosition - Position
 		local SegmentLength = deltaPosition.Magnitude
-		AccumulatedDistance = AccumulatedDistance + SegmentLength
-		LookUp.Distances[i] = AccumulatedDistance
+		AccumulatedDistance = AccumulatedDistance + SegmentLength --Update the accumlated distance based on the previous position and the new position
+		LookUp.Distances[i] = AccumulatedDistance --Store the accumulated distance in the look up in order to map it in the future
 		prevPosition = Position
 	end
 
@@ -241,7 +242,7 @@ end
 function BezierPath:_ClampDistance(Position1: Vector3, Position2: Vector3): number
 	local Distance = (Position1 - Position2).Magnitude
 
-	if Distance < self.CurveSize ^ 2 then return Distance / self.CurveSize end
+	if Distance < self.CurveSize ^ 2 then return Distance / self.CurveSize end -- If the distance is too small between the waypoints, adjust the curve size to prevent path overlap.
 
 	return self.CurveSize
 end
@@ -253,7 +254,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 
 	table.insert(newWaypoints,StartingPositions[1] - (StartingPositions[1] - StartingPositions[2]).Unit * self:_ClampDistance(StartingPositions[1],StartingPositions[2]))
 
-	for i = 2,#StartingPositions-1 do
+	for i = 2,#StartingPositions-1 do --Generate the control points for each sections bezier by using the previous and next position
 		local CurrentPosition = StartingPositions[i]
 		local NextPosition = StartingPositions[i + 1]
 		local PreviousPosition = StartingPositions[i - 1]
@@ -275,7 +276,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 	table.insert(newWaypoints,StartingPositions[#StartingPositions])
 
 
-	for Index = 2,#newWaypoints,2 do
+	for Index = 2,#newWaypoints,2 do --Create sections from the newly generated waypoints.
 		local Positions = {
 			newWaypoints[Index - 1],
 			newWaypoints[Index],
@@ -292,19 +293,19 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 
 	self:_CalculatePathLength()
 
-	for _,Section in self.Sections do
+	for _,Section in self.Sections do --Get the distance lookup for every section
 		Section.LookUp = self:_CreateSectionLookup(Section)
 	end
 
 	self:_CreatePathLookup()
 
-	self.ITERATION_AMOUNT = math.floor(self:GetPathLength() * 8)
+	self.ITERATION_AMOUNT = math.floor(self:GetPathLength() * 8) --Calculate the iteration amount, used in the precomputation
 
 	self:_PrecomputeUniformPositions()
 end
 
 function BezierPath:_CalculatePathLength()
-	for i,section in self.Sections do
+	for i,section in self.Sections do --add up all section lengths in order to get the total path length
 		self.PathLength += section.Length
 	end
 end
@@ -313,8 +314,8 @@ function BezierPath:_CreatePathLookup()
 	local AccumalatedLength = 0
 	for i,Section in self.Sections do
 		AccumalatedLength += Section.Length
-		local PortionOfPath = AccumalatedLength / self.PathLength
-		self.PathLookup[Section] = {PortionOfPath,(AccumalatedLength - Section.Length) / self.PathLength}
+		local PortionOfPath = AccumalatedLength / self.PathLength --find which portion of the path this section is located in.
+		self.PathLookup[Section] = {PortionOfPath,(AccumalatedLength - Section.Length) / self.PathLength} --Store it in the path lookup for later use
 	end
 end
 
