@@ -23,6 +23,12 @@ for t = 0,1,1/100 do
     task.wait(0.1)
 end
 ```
+A short video showing BezierPath.
+
+
+
+https://github.com/omrezkeypie/BezierPath/assets/104690138/5e3fe18a-c8d3-4f0d-a475-55a3bfca6793
+
 
 ## API
 
