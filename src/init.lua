@@ -161,7 +161,7 @@ function BezierPath:_InterpolateT(Lookup: LookUp, T1: number): number
 	local hi = #distances
 
 	repeat --Binary search to find the correct distance value in the look up table and map it to get uniform positioning across the curve
-		local i = math.floor(lo + (hi - lo) / 2)
+		local i = lo + (hi - lo) // 2
 		local value = distances[i + 1]
 		local previousValue = distances[i]
 
@@ -207,7 +207,7 @@ function BezierPath:_CalculateLength(Positions: { Vector3 }): number
 	local Length = 0
 	local Epsilon = 1/DEFAULT_EPSILON --Step amount using an epsilon
 
-	for i = 0,1,Epsilon do --approximate the length cause beziers dont have a length formula :(
+	for i = 0,1,Epsilon do --approximate the length cause beziers don't have a length formula :(
 		local Pos1,Pos2 = self:_CalculateSectionPosition(Positions,i),self:_CalculateSectionPosition(Positions,i+Epsilon)
 		Length += (Pos1 - Pos2).Magnitude
 	end
@@ -228,7 +228,7 @@ function BezierPath:_CreateSectionLookup(Section: Section): LookUp
 		local Position = self:_CalculateSectionPosition(Section.Positions, i / Segments)
 		local deltaPosition = prevPosition - Position
 		local SegmentLength = deltaPosition.Magnitude
-		AccumulatedDistance = AccumulatedDistance + SegmentLength --Update the accumlated distance based on the previous position and the new position
+		AccumulatedDistance = AccumulatedDistance + SegmentLength --Update the accumulated distance based on the previous position and the new position
 		LookUp.Distances[i] = AccumulatedDistance
 		prevPosition = Position
 	end
@@ -254,7 +254,7 @@ function BezierPath:_Setup(StartingPositions: { Vector3 })
 
 	table.insert(newWaypoints,StartingPositions[1] - (StartingPositions[1] - StartingPositions[2]).Unit * self:_ClampDistance(StartingPositions[1],StartingPositions[2]))
 
-	for i = 2,#StartingPositions-1 do --Generate the control points for each sections bezier by using the previous and next position
+	for i = 2,#StartingPositions-1 do --Generate the control points for each section's bezier by using the previous and next position
 		local CurrentPosition = StartingPositions[i]
 		local NextPosition = StartingPositions[i + 1]
 		local PreviousPosition = StartingPositions[i - 1]
