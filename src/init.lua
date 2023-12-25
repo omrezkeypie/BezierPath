@@ -101,7 +101,7 @@ function BezierPath:_CalculateDerivative(Positions: { Vector3 }, t: number): Vec
 	return bezder(Positions[1], Positions[2], Positions[3], t)
 end
 
-function BezierPath:_CalculateCFrame(Positions: { Vector3 }, t: number): CFrame --More effiecent than using the derivative
+function BezierPath:_CalculateCFrame(Positions: { Vector3 }, t: number): CFrame --More efficient than using the derivative
 	local pos = bez(Positions[1], Positions[2], Positions[3], t)
 	local lookAt = bez(Positions[1], Positions[2], Positions[3], t + 1/DEFAULT_EPSILON)
 	return CFrame.lookAt(pos, lookAt)
