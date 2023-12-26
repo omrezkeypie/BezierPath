@@ -156,12 +156,12 @@ function BezierPath:_InterpolateT(Lookup: LookUp, T1: number): number
 	local n = #distances - 1 
 	local targetDistance = self.PathLength * T1 --Translate T value to the distance along the path
 
-	--Indexs for binary search
+	--Indexes for binary search
 	local lo = 0
 	local hi = #distances
 
 	repeat --Binary search to find the correct distance value in the look up table and map it to get uniform positioning across the curve
-		local i = lo + (hi - lo) // 2
+		local i = (lo + hi) // 2
 		local value = distances[i + 1]
 		local previousValue = distances[i]
 
@@ -175,7 +175,7 @@ function BezierPath:_InterpolateT(Lookup: LookUp, T1: number): number
 				i / n,
 				(i + 1) / n
 			)  
-		elseif value > targetDistance then --if not found, update the indexs and continue the binary search
+		elseif value > targetDistance then --if not found, update the indexes and continue the binary search
 			hi = i
 		else
 			lo = i + 1
