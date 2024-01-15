@@ -15,8 +15,8 @@ local Positions = {
 }
 local NewPath = BezierPath.new(Positions,3)
 local Part = Instance.new("Part",workspace)
-part.Size = Vector3.new(1,1,1)
-part.Anchored = true
+Part.Size = Vector3.new(1,1,1)
+Part.Anchored = true
 
 for t = 0,1,1/100 do
     Part.CFrame = NewPath:CalculateUniformCFrame(t)
