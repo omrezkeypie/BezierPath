@@ -34,7 +34,7 @@ https://github.com/omrezkeypie/BezierPath/assets/104690138/5e3fe18a-c8d3-4f0d-a4
 
 * BezierPath.new(Positions,CurveSize)
 
-Takes in a table of positions which will be used as the waypoints for the spline and takes in a number (maximum is 3) to control the size of the curve between the waypoints and returns the path object.
+Takes in a table of positions which will be used as the waypoints for the spline and takes in a number to control the size of the curve between the waypoints and returns the path object.
 
 * Path:CalculateUniformCFrame(T)
   
