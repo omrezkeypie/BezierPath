@@ -76,7 +76,7 @@ function BezierPath.new(Waypoints: { Vector3 }, CurveSize: number): Path
 		Positions = {},
 		CFrames = {}
 	}
-	newPath.CurveSize = math.clamp(CurveSize,0.1,3)
+	newPath.CurveSize = CurveSize
 	newPath.ITERATION_AMOUNT = 0
 	newPath:_Setup(Waypoints)
 
