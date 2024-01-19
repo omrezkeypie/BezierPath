@@ -125,7 +125,7 @@ function BezierPath:CalculateUniformCFrame(T: number): CFrame
 	local SecondSample = self.PrecomputedCache["CFrames"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
     
 	local SampleSubtraction = (SecondSample[2] - FirstSample[2])
-	local Progress = (T - math.clamp(FirstSample[2], 0, T)) / SampleSubtraction
+	local Progress = (T - FirstSample[2]) / SampleSubtraction
 
 	if SampleSubtraction == 0 then Progress = 1 end
 
@@ -138,7 +138,7 @@ function BezierPath:CalculateUniformPosition(T: number): Vector3
 	local SecondSample = self.PrecomputedCache["Positions"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
 
 	local SampleSubtraction = (SecondSample[2] - FirstSample[2])
-	local Progress = (T - math.clamp(FirstSample[2], 0, T)) / SampleSubtraction
+	local Progress = (T - FirstSample[2]) / SampleSubtraction
 
 	if SampleSubtraction == 0 then Progress = 1 end
 
