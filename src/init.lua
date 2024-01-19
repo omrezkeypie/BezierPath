@@ -120,26 +120,27 @@ function BezierPath:_CalculatePrecomputationCFrame(T: number): CFrame
 end
 
 function BezierPath:CalculateUniformCFrame(T: number): CFrame
-	if T >= 0.99 then return self.PrecomputedCache["CFrames"][self.ITERATION_AMOUNT - 1][1] end
-	
 	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMOUNT),self.ITERATION_AMOUNT - 1)
 	local FirstSample = self.PrecomputedCache["CFrames"][TranslatedIndex]
 	local SecondSample = self.PrecomputedCache["CFrames"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
+    
+	local SampleSubtraction = (SecondSample[2] - FirstSample[2])
+	local Progress = (T - math.clamp(FirstSample[2], 0, T)) / SampleSubtraction
 
-	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
+	if SampleSubtraction == 0 then Progress = 1 end
 
 	return FirstSample[1]:Lerp(SecondSample[1],Progress)
 end
 
 function BezierPath:CalculateUniformPosition(T: number): Vector3
-	if T >= 0.99 then return self.PrecomputedCache["Positions"][self.ITERATION_AMOUNT - 1][1] end
-
-	
 	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMOUNT),self.ITERATION_AMOUNT - 1)
 	local FirstSample = self.PrecomputedCache["Positions"][TranslatedIndex]
 	local SecondSample = self.PrecomputedCache["Positions"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
 
-	local Progress = (T - FirstSample[2]) / (SecondSample[2] - FirstSample[2])
+	local SampleSubtraction = (SecondSample[2] - FirstSample[2])
+	local Progress = (T - math.clamp(FirstSample[2], 0, T)) / SampleSubtraction
+
+	if SampleSubtraction == 0 then Progress = 1 end
 
 	return lerp(FirstSample[1],SecondSample[1],Progress)
 end
