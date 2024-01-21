@@ -123,7 +123,7 @@ function BezierPath:CalculateUniformCFrame(T: number): CFrame
 	local TranslatedIndex = math.min(math.floor(math.clamp(T,0,1) * self.ITERATION_AMOUNT),self.ITERATION_AMOUNT - 1)
 	local FirstSample = self.PrecomputedCache["CFrames"][TranslatedIndex]
 	local SecondSample = self.PrecomputedCache["CFrames"][math.min(TranslatedIndex + 1,self.ITERATION_AMOUNT - 1)]
-    
+
 	local SampleSubtraction = (SecondSample[2] - FirstSample[2])
 	local Progress = (T - FirstSample[2]) / SampleSubtraction
 
@@ -164,7 +164,7 @@ function BezierPath:_InterpolateT(Lookup: LookUp, T1: number): number
 	local hi = #distances
 
 	repeat
-		local i = math.floor(lo + (hi - lo) / 2)
+		local i = lo + (hi - lo) // 2
 		local value = distances[i + 1]
 		local previousValue = distances[i]
 
