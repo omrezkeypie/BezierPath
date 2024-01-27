@@ -245,7 +245,7 @@ end
 function BezierPath:_ClampDistance(Position1: Vector3, Position2: Vector3): number
 	local Distance = (Position1 - Position2).Magnitude
 
-	if Distance < self.CurveSize ^ 2 then return Distance / self.CurveSize end
+	if Distance < self.CurveSize * 2 then return Distance / 2 end
 
 	return self.CurveSize
 end
