@@ -2,6 +2,7 @@
 BezierPath is an easy to use bezier spline module, designed to be used for TD games and general paths while being optimizied for large scale uses.
 
 __NOTE__: BezierPath is NOT a traditional bezier spline. it behaves more like a linear spline that curves around each point.
+
 __NOTE__: BezierPath has precomputation in it already. so no need to cache anything in your projects.
 
 ## Example
