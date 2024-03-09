@@ -5,6 +5,11 @@ __NOTE__: BezierPath is NOT a traditional bezier spline. it behaves more like a 
 
 __NOTE__: BezierPath has precomputation in it already. so no need to cache anything in your projects.
 
+BezierPath can be installed using Wally:
+```
+"omrezkeypie/bezierpath@1.0.11"
+```
+
 ## Example
 
 A code snippet showing how to set up and use BezierPath.
