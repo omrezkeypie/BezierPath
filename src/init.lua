@@ -148,11 +148,11 @@ end
 
 function BezierPath:CalculateDerivative(T : number) : Vector3
 	T = math.clamp(T,0,1)
-	
+
 	local PathSection = self:_InterpolateTPath(T)
 	local InterpolatedT = self:_InterpolateT(PathSection.LookUp,T)
 	local Positions = PathSection.Positions
-	
+
 	return BezierDerivative(Positions[1],Positions[2],Positions[3],InterpolatedT)
 end
 
@@ -164,7 +164,7 @@ function BezierPath:CalculateClosestPoint(Position : Vector3,Iterations : number
 	local MaxIterations = Iterations or DEFAULT_ITERATIONS
 	local ClosestT
 
-	while Iteration < MaxIterations do
+	for i = 1,MaxIterations do
 		local Position1,Position2,Position3 = self:CalculateUniformPosition(Start),self:CalculateUniformPosition(Middle),self:CalculateUniformPosition(End)
 		local StartDistance = (Position1 - Position).Magnitude
 		local MiddleDistance = (Position2 - Position).Magnitude
@@ -191,8 +191,6 @@ function BezierPath:CalculateClosestPoint(Position : Vector3,Iterations : number
 			Start = Middle
 			Middle = (End + Middle) / 2
 		end
-
-		Iteration += 1
 	end
 
 	return self:CalculateUniformPosition(ClosestT),ClosestT
