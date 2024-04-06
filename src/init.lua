@@ -1,6 +1,8 @@
 --!native
 --!strict
 
+type PrecomputedCache = { any }
+
 type LookUp = {
 	Distances: { number }
 }
@@ -18,8 +20,8 @@ type self = {
 	TotalDistance: number,
 	SampleAmount: number,
 	PrecomputedCache: {
-		Positions: { {any} },
-		CFrames: { {any} }
+		Positions: { PrecomputedCache },
+		CFrames: { PrecomputedCache },
 	},
 	CurveSize: number,
 	ITERATION_AMOUNT: number
@@ -36,6 +38,8 @@ type Module = {
 	_CalculatePrecomputationCFrame: (self: Path, T: number) -> CFrame,
 	CalculateUniformCFrame: (self: Path, T: number) -> CFrame,
 	CalculateUniformPosition: (self: Path, T: number) -> Vector3,
+	CalculateDerivative: (self: Path, T: number) -> Vector3,
+	CalculateClosestPoint: (self: Path, Position: Vector3,Iterations : number?) -> Vector3,
 	_InterpolateTPath: (self: Path, T: number) -> Section,
 	_InterpolateT: (self: Path, Lookup: LookUp, T1: number) -> number,
 	_PrecomputeUniformPositions: (self: Path) -> (),
@@ -50,16 +54,17 @@ type Module = {
 local BezierPath: Module = {} :: Module
 BezierPath.__index = BezierPath
 local DEFAULT_EPSILON = 100
+local DEFAULT_ITERATIONS = 20
 
-local function bez(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3 
+local function Bezier(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3 
 	return p1 + (1-t)^2*(p0 - p1)+t^2*(p2 - p1)
 end
 
-local function bezder(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3
+local function BezierDerivative(p0: Vector3, p1: Vector3, p2: Vector3, t: number): Vector3
 	return 2*(1 - t)*(p1-p0) + 2*t*(p2-p1)
 end
 
-local function lerp(p0: Vector3, p1: Vector3, t: number): Vector3
+local function Lerp(p0: Vector3, p1: Vector3, t: number): Vector3
 	return p0 + t*(p1 - p0)
 end
 
@@ -92,16 +97,12 @@ function BezierPath:_Map(Value: number, In_min: number, In_max: number, Out_min:
 end
 
 function BezierPath:_CalculateSectionPosition(Positions: { Vector3 }, t: number): Vector3
-	return bez(Positions[1], Positions[2], Positions[3], t)
-end
-
-function BezierPath:_CalculateDerivative(Positions: { Vector3 }, t: number): Vector3
-	return bezder(Positions[1], Positions[2], Positions[3], t)
+	return Bezier(Positions[1], Positions[2], Positions[3], t)
 end
 
 function BezierPath:_CalculateCFrame(Positions: { Vector3 }, t: number): CFrame --More effiecent than using the derivative
-	local pos = bez(Positions[1], Positions[2], Positions[3], t)
-	local lookAt = bez(Positions[1], Positions[2], Positions[3], t + 1/DEFAULT_EPSILON)
+	local pos = Bezier(Positions[1], Positions[2], Positions[3], t)
+	local lookAt = Bezier(Positions[1], Positions[2], Positions[3], t + 1/DEFAULT_EPSILON)
 	return CFrame.new(pos, lookAt)
 end
 
@@ -142,7 +143,59 @@ function BezierPath:CalculateUniformPosition(T: number): Vector3
 
 	if SampleSubtraction == 0 then Progress = 1 end
 
-	return lerp(FirstSample[1],SecondSample[1],Progress)
+	return Lerp(FirstSample[1],SecondSample[1],Progress)
+end
+
+function BezierPath:CalculateDerivative(T : number) : Vector3
+	T = math.clamp(T,0,1)
+	
+	local PathSection = self:_InterpolateTPath(T)
+	local InterpolatedT = self:_InterpolateT(PathSection.LookUp,T)
+	local Positions = PathSection.Positions
+	
+	return BezierDerivative(Positions[1],Positions[2],Positions[3],InterpolatedT)
+end
+
+function BezierPath:CalculateClosestPoint(Position : Vector3,Iterations : number?) : (Vector3 , number)
+	local Start = 0
+	local Middle = 0.5
+	local End = 1
+	local Iteration = 0
+	local MaxIterations = Iterations or DEFAULT_ITERATIONS
+	local ClosestT
+
+	while Iteration < MaxIterations do
+		local Position1,Position2,Position3 = self:CalculateUniformPosition(Start),self:CalculateUniformPosition(Middle),self:CalculateUniformPosition(End)
+		local StartDistance = (Position1 - Position).Magnitude
+		local MiddleDistance = (Position2 - Position).Magnitude
+		local EndDistance = (Position3 - Position).Magnitude
+
+		if StartDistance < EndDistance and StartDistance < MiddleDistance and MiddleDistance < EndDistance then
+			ClosestT = Start
+
+			End = Middle
+			Middle = (Start + Middle) / 2
+		elseif EndDistance < StartDistance and EndDistance < MiddleDistance and MiddleDistance < StartDistance then
+			ClosestT = End
+
+			Start =  Middle
+			Middle = (Start + End) / 2
+		elseif MiddleDistance < StartDistance and StartDistance < EndDistance then
+			ClosestT = Middle
+
+			End = Middle
+			Middle = (Start + Middle) / 2
+		else
+			ClosestT = Middle
+
+			Start = Middle
+			Middle = (End + Middle) / 2
+		end
+
+		Iteration += 1
+	end
+
+	return self:CalculateUniformPosition(ClosestT),ClosestT
 end
 
 function BezierPath:_InterpolateTPath(T: number): Section
