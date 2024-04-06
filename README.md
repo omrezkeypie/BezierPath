@@ -61,4 +61,4 @@ Takes in a T value from 0-1 and returns the derivative of that T value.
 
 * Path:CalculateClosestPoint(Position)
 
-Takes in a Vector3 position and returns the closest point on the path to the inputted position.
+Takes in a Vector3 position and returns the closest point and the closest T value on the path to the inputted position.
