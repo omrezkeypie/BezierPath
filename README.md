@@ -39,23 +39,32 @@ https://github.com/omrezkeypie/BezierPath/assets/104690138/5e3fe18a-c8d3-4f0d-a4
 
 ## API
 
-* BezierPath.new(Positions : {Vector3},CurveSize : number) : Path
-
+```lua
+BezierPath.new(Positions : {Vector3},CurveSize : number) : Path
+```
 Takes in a table of positions which will be used as the waypoints for the spline and takes in a number to control the size of the curve between the waypoints and returns the path object.
 
-* Path:CalculateUniformCFrame(T : number) : CFrame
-  
+```lua
+Path:CalculateUniformCFrame(T : number) : CFrame
+```
+
 Takes in a T value from 0-1 and returns a uniform cframe across the path object.
 
-* Path:CalculateUniformPosition(T : number) : Position
+```lua
+Path:CalculateUniformPosition(T : number) : Position
+```
   
 Takes in a T value from 0-1 and returns a uniform position across the path object.
 
-* Path:GetPathLength() : number
+```lua
+Path:GetPathLength() : number
+```
 
 Returns the path objects length.
 
-* Path:CalculateDerivative(T : number) : Vector3
+```lua
+Path:CalculateDerivative(T : number) : Vector3
+```
   
 Takes in a T value from 0-1 and returns the derivative of that T value.
 
