@@ -3,6 +3,8 @@
 --!strict
 
 local EPSILON = 100
+local MAX_ITERATIONS = 20
+
 
 type Section = {
 	Positions : {Vector3},
@@ -249,14 +251,13 @@ function Methods:CalculateDerivative(T : number) : Vector3
 	return CalculateSectionDerivative(Section,MappedT)
 end
 
-function Methods:CalculateClosestPoint(Position: Vector3, Iterations: number?) : (CFrame, number)
+function Methods:CalculateClosestPoint(Position: Vector3) : (CFrame, number)
 	local Start = 0
 	local End = 1
-	local MaxIterations = Iterations or 20
-	local Precision = 1e-6 -- Adjust precision as needed
+	local Precision = 1e-6
 	local ClosestT = 0
 
-	for i = 1, MaxIterations do
+	for i = 1, MAX_ITERATIONS do
 		local Middle1 = Start + (End - Start) / 3
 		local Middle2 = End - (End - Start) / 3
 
