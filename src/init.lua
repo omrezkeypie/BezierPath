@@ -1,5 +1,6 @@
 --!optimize 2
 --!native
+--!strict
 
 local EPSILON = 100
 
@@ -16,7 +17,7 @@ type Methods = {
 	CalculateUniformCFrame: (self : Path,T : number) -> CFrame,
 	CalculateDerivative: (self : Path,T : number) -> Vector3,
 	GetPathLength: (self : Path) -> number,
-	CalculateClosestPoint: (self : Path) -> (Vector3,number)
+	CalculateClosestPoint: (self : Path,Position : Vector3,Iterations : number?) -> (CFrame,number)
 }
 
 export type Path = {
