@@ -10,6 +10,8 @@ BezierPath can be installed using Wally:
 BezierPath = "omrezkeypie/bezierpath@1.1.0"
 ```
 
+To view the API and usage, go [here](https://github.com/omrezkeypie/BezierPath/wiki/API)
+
 ## Example
 
 A code snippet showing how to set up and use BezierPath.
@@ -35,41 +37,3 @@ A short video showing BezierPath.
 
 
 https://github.com/omrezkeypie/BezierPath/assets/104690138/5e3fe18a-c8d3-4f0d-a475-55a3bfca6793
-
-
-## API
-
-```lua
-BezierPath.new(Positions : {Vector3},CurveSize : number) : Path
-```
-Takes in a table of positions which will be used as the waypoints for the spline and takes in a number to control the size of the curve between the waypoints and returns the path object.
-
-```lua
-Path:CalculateUniformCFrame(T : number) : CFrame
-```
-
-Takes in a T value from 0-1 and returns a uniform cframe across the path object.
-
-```lua
-Path:CalculateUniformPosition(T : number) : Position
-```
-  
-Takes in a T value from 0-1 and returns a uniform position across the path object.
-
-```lua
-Path:GetPathLength() : number
-```
-
-Returns the path objects length.
-
-```lua
-Path:CalculateDerivative(T : number) : Vector3
-```
-  
-Takes in a T value from 0-1 and returns the derivative of that T value.
-
-```lua
-Path:CalculateClosestPoint(Position : Vector3) : (Vector3,number)
-```
-
-Takes in a Vector3 position and returns the closest point and the closest T value on the path to the inputted position.
