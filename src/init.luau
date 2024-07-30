@@ -69,6 +69,14 @@ local function CalculateSectionCFrame(Section : Section,T : number) : CFrame
 	return CFrame.new(Position,Position + Derivative)
 end
 
+local function ClampCurveSize(Position1 : Vector3,Position2 : Vector3,CurveSize : number) : number
+	local Distance = (Position1 - Position2).Magnitude
+
+	if Distance < CurveSize * 2 then return Distance / 2 end
+
+	return CurveSize
+end
+
 local function SetupWaypoints(InputtedWaypoints : {Vector3},CurveSize : number) : {Vector3}
 	local Waypoints = {}
 	
@@ -79,8 +87,8 @@ local function SetupWaypoints(InputtedWaypoints : {Vector3},CurveSize : number) 
 		local PreviousPosition = InputtedWaypoints[i - 1]
 		local NextPosition = InputtedWaypoints[i + 1]
 		
-		local PreviousPosition = Position - (Position - PreviousPosition).Unit * CurveSize
-		local NextPosition =  Position - (Position - NextPosition).Unit * CurveSize
+		local PreviousPosition = Position - (Position - PreviousPosition).Unit * ClampCurveSize(Position,PreviousPosition,CurveSize)
+		local NextPosition =  Position - (Position - NextPosition).Unit * ClampCurveSize(Position,NextPosition,CurveSize)
 		
 		table.insert(Waypoints,PreviousPosition)
 		table.insert(Waypoints,Position)
@@ -291,7 +299,6 @@ function Methods:CalculateClosestPoint(Position: Vector3) : (CFrame, number)
 	end
 
 	return self:CalculateUniformCFrame(ClosestT), ClosestT
-end
-
+end 
 
 return BezierPath 
