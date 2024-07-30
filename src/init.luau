@@ -260,45 +260,20 @@ function Methods:CalculateDerivative(T : number) : Vector3
 end
 
 function Methods:CalculateClosestPoint(Position: Vector3) : (CFrame, number)
-	local Start = 0
-	local End = 1
-	local Precision = 1e-6
 	local ClosestT = 0
+	local ClosestDistance = math.huge
 
-	for i = 1, MAX_ITERATIONS do
-		local Middle1 = Start + (End - Start) / 3
-		local Middle2 = End - (End - Start) / 3
-
-		local Position1 = self:CalculateUniformPosition(Start)
-		local Position2 = self:CalculateUniformPosition(Middle1)
-		local Position3 = self:CalculateUniformPosition(Middle2)
-		local Position4 = self:CalculateUniformPosition(End)
-
-		local Distance1 = (Position1 - Position).Magnitude
-		local Distance2 = (Position2 - Position).Magnitude
-		local Distance3 = (Position3 - Position).Magnitude
-		local Distance4 = (Position4 - Position).Magnitude
-
-		if Distance1 < Distance2 and Distance1 < Distance3 and Distance1 < Distance4 then
-			ClosestT = Start
-			End = Middle2
-		elseif Distance4 < Distance1 and Distance4 < Distance2 and Distance4 < Distance3 then
-			ClosestT = End
-			Start = Middle1
-		elseif Distance2 < Distance3 then
-			ClosestT = Middle1
-			End = Middle2
-		else
-			ClosestT = Middle2
-			Start = Middle1
-		end
-
-		if (End - Start) < Precision then
-			break
+	for T = 0,1,1/150 do
+		local PathPosition = self:CalculateUniformPosition(T)
+		local Distance = (PathPosition - Position).Magnitude
+		
+		if ClosestDistance > Distance then
+			ClosestDistance = Distance
+			ClosestT = T
 		end
 	end
 
 	return self:CalculateUniformCFrame(ClosestT), ClosestT
-end 
+end
 
 return BezierPath 
