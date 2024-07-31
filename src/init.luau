@@ -5,8 +5,6 @@
 local EPSILON = 100
 local MAX_ITERATIONS = 20
 
-local Dot = Vector3.new().Dot
-
 type Section = {
 	Positions : {Vector3},
 	Length : number,
