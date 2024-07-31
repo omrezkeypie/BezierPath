@@ -5,6 +5,7 @@
 local EPSILON = 100
 local MAX_ITERATIONS = 20
 
+local Dot = Vector3.new().Dot
 
 type Section = {
 	Positions : {Vector3},
@@ -77,18 +78,25 @@ local function ClampCurveSize(Position1 : Vector3,Position2 : Vector3,CurveSize 
 	return CurveSize
 end
 
-local function SetupWaypoints(InputtedWaypoints : {Vector3},CurveSize : number) : {Vector3}
+local function GetCurveSize(CurveSize : number | {number},Index : number) : number
+	if typeof(CurveSize) == "number" then return CurveSize end
+	
+	return CurveSize[Index] or CurveSize[1]
+end
+
+local function SetupWaypoints(InputtedWaypoints : {Vector3},CurveSize : number | {number}) : {Vector3}
 	local Waypoints = {}
 	
 	table.insert(Waypoints,InputtedWaypoints[1]) 
 	 
 	for i = 2,#InputtedWaypoints - 1 do
+		local GottenCurveSize = GetCurveSize(CurveSize,i - 1)
 		local Position = InputtedWaypoints[i]
 		local PreviousPosition = InputtedWaypoints[i - 1]
 		local NextPosition = InputtedWaypoints[i + 1]
 		
-		local PreviousPosition = Position - (Position - PreviousPosition).Unit * ClampCurveSize(Position,PreviousPosition,CurveSize)
-		local NextPosition =  Position - (Position - NextPosition).Unit * ClampCurveSize(Position,NextPosition,CurveSize)
+		local PreviousPosition = Position - (Position - PreviousPosition).Unit * ClampCurveSize(Position,PreviousPosition,GottenCurveSize)
+		local NextPosition =  Position - (Position - NextPosition).Unit * ClampCurveSize(Position,NextPosition,GottenCurveSize)
 		
 		table.insert(Waypoints,PreviousPosition)
 		table.insert(Waypoints,Position)
@@ -216,7 +224,7 @@ local function LoadMethods(Object : {})
 	end
 end
 
-function BezierPath.new(Waypoints : {Vector3},CurveSize : number) : Path
+function BezierPath.new(Waypoints : {Vector3},CurveSize : number | {number}) : Path
 	local BezierWaypoints = SetupWaypoints(Waypoints,CurveSize)
 	
 	local Sections = CreateSections(BezierWaypoints)
@@ -262,18 +270,18 @@ end
 function Methods:CalculateClosestPoint(Position: Vector3) : (CFrame, number)
 	local ClosestT = 0
 	local ClosestDistance = math.huge
-
-	for T = 0,1,1/150 do
+	
+	for T = 0,1,1/100 do
 		local PathPosition = self:CalculateUniformPosition(T)
 		local Distance = (PathPosition - Position).Magnitude
 		
-		if ClosestDistance > Distance then
+		if Distance < ClosestDistance then
 			ClosestDistance = Distance
 			ClosestT = T
 		end
 	end
-
+	
 	return self:CalculateUniformCFrame(ClosestT), ClosestT
-end
+end 
 
 return BezierPath 
