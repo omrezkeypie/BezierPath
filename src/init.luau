@@ -18,7 +18,8 @@ type Methods = {
 	CalculateUniformCFrame: (self : Path,T : number) -> CFrame,
 	CalculateDerivative: (self : Path,T : number) -> Vector3,
 	GetPathLength: (self : Path) -> number,
-	CalculateClosestPoint: (self : Path,Position : Vector3,Iterations : number?) -> (CFrame,number)
+	CalculateClosestPoint: (self : Path,Position : Vector3,Iterations : number?) -> (CFrame,number),
+	VisualizePath: (self : Path) -> (),
 }
 
 export type Path = {
@@ -90,11 +91,11 @@ local function SetupWaypoints(InputtedWaypoints : {Vector3},CurveSize : number |
 	for i = 2,#InputtedWaypoints - 1 do
 		local GottenCurveSize = GetCurveSize(CurveSize,i - 1)
 		local Position = InputtedWaypoints[i]
-		local PreviousPosition = InputtedWaypoints[i - 1]
-		local NextPosition = InputtedWaypoints[i + 1]
+		local InputtedPreviousPosition = InputtedWaypoints[i - 1]
+		local InputtedNextPosition = InputtedWaypoints[i + 1]
 
-		local PreviousPosition = Position - (Position - PreviousPosition).Unit * ClampCurveSize(Position,PreviousPosition,GottenCurveSize)
-		local NextPosition =  Position - (Position - NextPosition).Unit * ClampCurveSize(Position,NextPosition,GottenCurveSize)
+		local PreviousPosition = Position - (Position - InputtedPreviousPosition).Unit * ClampCurveSize(Position,InputtedPreviousPosition,GottenCurveSize)
+		local NextPosition =  Position - (Position - InputtedNextPosition).Unit * ClampCurveSize(Position,InputtedNextPosition,GottenCurveSize)
 
 		table.insert(Waypoints,PreviousPosition)
 		table.insert(Waypoints,Position)
@@ -281,5 +282,23 @@ function Methods:CalculateClosestPoint(Position: Vector3) : (CFrame, number)
 
 	return self:CalculateUniformCFrame(ClosestT), ClosestT
 end 
+
+local function MakePart(InputtedCFrame : CFrame)
+	local Part = Instance.new("Part")
+	Part.Anchored = true
+	Part.Transparency = 0.5
+	Part.CanCollide = false
+	Part.Size = Vector3.one
+	Part.Color = Color3.new(1, 0.235294, 0.247059)
+	Part.Material = Enum.Material.SmoothPlastic
+	Part.CFrame = InputtedCFrame
+	Part.Parent = workspace
+end
+
+function Methods:VisualizePath()
+	for T = 0,1,1/100 do
+		MakePart(self:CalculateUniformCFrame(T))
+	end
+end
 
 return BezierPath 
