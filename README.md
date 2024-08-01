@@ -7,7 +7,7 @@ __NOTE__: BezierPath has precomputation in it already. so no need to cache anyth
 
 BezierPath can be installed using Wally:
 ```
-BezierPath = "omrezkeypie/bezierpath@1.1.0"
+BezierPath = "omrezkeypie/bezierpath@2.0.1"
 ```
 
 To view the API and usage, go [here](https://github.com/omrezkeypie/BezierPath/wiki/API)
