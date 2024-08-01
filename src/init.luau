@@ -120,7 +120,7 @@ local function CalculateSectionLength(Section : Section) : number
 	return Length
 end
 
-local function CalculatePathLength(Sections : {Section})
+local function CalculatePathLength(Sections : {Section}) : number
 	local TotalLength = 0
 
 	for _,Section in Sections do
