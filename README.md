@@ -5,7 +5,7 @@ __NOTE__: BezierPath is NOT a traditional bezier spline. it behaves more like a 
 
 BezierPath can be installed using Wally:
 ```
-BezierPath = "omrezkeypie/bezierpath@2.0.1"
+BezierPath = "omrezkeypie/bezierpath@2.0.3"
 ```
 
 To view the API and usage, go [here](https://github.com/omrezkeypie/BezierPath/wiki/API)
