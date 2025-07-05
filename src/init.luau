@@ -10,7 +10,8 @@ type Section = {
 	Length : number,
 	Type : number,
 	TRanges : {number},
-	AccumulatedDistance : number
+	AccumulatedDistance : number,
+	DistanceLookup : {number}
 }
 
 type Methods = {
@@ -33,6 +34,10 @@ type Module = {
 
 local BezierPath : Module = {} :: Module
 local Methods : Methods = {} :: Methods
+
+local function Map(Value: number, In_min: number, In_max: number, Out_min: number, Out_max: number): number
+	return (Value - In_min) * (Out_max - Out_min) / (In_max - In_min) + Out_min
+end
 
 local function Bezier(p0: Vector3, p1: Vector3, p2: Vector3, t: number) : Vector3 
 	return p1 + (1-t)^2*(p0 - p1)+t^2*(p2 - p1)
@@ -130,6 +135,25 @@ local function CalculatePathLength(Sections : {Section}) : number
 	return TotalLength
 end
 
+local function CreateSectionsDistanceLookup(Sections : {Section})
+	for _,Section in Sections do
+		local AccumulatedDistance = Section.AccumulatedDistance
+		local PreviousPosition = CalculateSectionPosition(Section,0)
+		local Segments = math.floor(Section.Length * 100)
+
+		for i = 1,Segments do
+			local Position = CalculateSectionPosition(Section,i / Segments)
+			local Distance = (Position - PreviousPosition).Magnitude
+
+			Section.DistanceLookup[i] = AccumulatedDistance
+			
+			AccumulatedDistance += Distance
+			
+			PreviousPosition = Position
+		end
+	end
+end
+
 local function CreateSections(BezierWaypoints : {Vector3}) : {Section}
 	local Sections = {}
 
@@ -159,7 +183,7 @@ local function CreateSections(BezierWaypoints : {Vector3}) : {Section}
 			Type = Step,
 			Length = 0,
 			TRanges = {},
-
+			DistanceLookup = {}
 		}
 
 		newSection.Length = CalculateSectionLength(newSection)
@@ -196,13 +220,37 @@ local function SetupSectionsAccumulatedDistance(Sections : {Section})
 	end
 end
 
-local function MapT(Section : Section,PathLength : number,T : number) : number
+local function MapT(Section : Section, PathLength : number, T : number) : number
 	if T >= 1 then return 1 end
+	if Section.Type == 1 then -- if it's a straight section, no need to map the T value, just linear interpolate
+		return ((T * PathLength) - Section.AccumulatedDistance) / Section.Length
+	end
 
 	local InputtedDistance = T * PathLength
-	local AccumulatedDistance = Section.AccumulatedDistance
+	local Low = 1
+	local High = #Section.DistanceLookup - 1
 
-	return (InputtedDistance - AccumulatedDistance) / Section.Length
+	while Low <= High do 
+		local i = math.floor((Low + High) / 2)
+		local Distance = Section.DistanceLookup[i]
+		local NextDistance = Section.DistanceLookup[i + 1]
+
+		if InputtedDistance >= Distance and InputtedDistance <= NextDistance then
+			return Map(
+				InputtedDistance,
+				Distance,
+				NextDistance,
+				i / (#Section.DistanceLookup - 1),
+				(i + 1) / (#Section.DistanceLookup - 1)
+			)
+		elseif InputtedDistance < Distance then
+			High = i - 1
+		else
+			Low = i + 1
+		end
+	end
+
+	return 1
 end
 
 local function GetSectionFromT(Sections : {Section},T : number) : Section
@@ -217,8 +265,6 @@ end
 
 local function LoadMethods(Object : {})
 	for FunctionName,Function in Methods do
-		if FunctionName == "new" then continue end
-
 		Object[FunctionName] = Function
 	end
 end
@@ -230,6 +276,7 @@ function BezierPath.new(Waypoints : {Vector3},CurveSize : number | {number}) : P
 	local PathLength = CalculatePathLength(Sections)
 	SetupSectionsT(PathLength,Sections)
 	SetupSectionsAccumulatedDistance(Sections)
+	CreateSectionsDistanceLookup(Sections)
 
 	local newPath : Path = {
 		Sections = Sections,
